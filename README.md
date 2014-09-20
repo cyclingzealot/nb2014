@@ -1,4 +1,4 @@
-nb2014
-======
+cdn2014
+=======
 
-Scrapper for NB 2014 elections
+Scrapping results of the by-election for 2014
