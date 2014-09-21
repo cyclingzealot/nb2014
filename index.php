@@ -1,11 +1,11 @@
-#!/usr/bin/php
 
-
+<!-- Scrapper for 2014 NB elections -->
 
 <?php
-#Scrapper for 2014 election
+
 
 $testing=FALSE;
+if($_GET["testing"]=="yes")  $testing=TRUE;
 
 $limit=107;
 
@@ -25,7 +25,7 @@ $wastedVotesByParty     = array();
 
 $url = 'http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp';
 
-echo 'Getting page....';
+webCommentPrint('Getting page....');
 $html = file_get_contents($url);
 
 $doc = new DOMDocument();
@@ -42,8 +42,8 @@ $query = "/html/body/div/div[4]/div[5]/div[2]/div/table";
 $tableNodes = $xpath->query($query);
 $tableCount = $tableNodes->length;
 
-echo "\nI found $h4Count riding headers\n";
-echo "\nI found $tableCount tables\n";
+webCommentPrint("\nI found $h4Count riding headers\n");
+webCommentPrint("\nI found $tableCount tables\n");
 
 
 for($i=0;  $i<$h4Count; $i++) {
@@ -52,7 +52,7 @@ for($i=0;  $i<$h4Count; $i++) {
 	$district = $h4Nodes->item($i)->textContent;
 	$district = trim(substr($district, strpos($district, ",") + 5));    
 
-	echo "Doing riding of $district\n";
+	webCommentPrint("Doing riding of $district\n");
 
 	/* SKIP PARSING NEW HTML DOCUMENT SINCE WE ALREADY HAVE IT
 	$doc = new DOMDocument();
@@ -62,7 +62,7 @@ for($i=0;  $i<$h4Count; $i++) {
 
     $xPathQuery = '//*[@id="grdResultsucElectoralDistrictResult'. $i . '"]/caption';
 
-    echo "\n\nxPath: $xPathQuery\n\n";
+    webCommentPrint(\n\nxPath: $xPathQuery\n\n");
 	$ridingNode = $xpath->query($xPathQuery);
 
     echo $ridingNames[$i];
@@ -73,7 +73,7 @@ for($i=0;  $i<$h4Count; $i++) {
 	
 
 	$tableNoNeeded = 2*$i+1;
-	echo "Getting table no $tableNoNeeded\n";
+	webCommentPrint("Getting table no $tableNoNeeded\n");
 	$table = $tableNodes->item($tableNoNeeded);
 
 	#echo get_class($tableNodes) . "\n";
@@ -83,35 +83,35 @@ for($i=0;  $i<$h4Count; $i++) {
 
 	$numRows = $rows->length;
 
-    echo "\nThere are $numRows rows\n";
+    webCommentPrint("\nThere are $numRows rows\n");
 
 	$j=0;
     
-	echo "Parsing results...";
+	webCommentPrint("Parsing results...");
 	for($j=0; $j<$numRows; $j++) {
 
 
 
 		if($j<=1)  continue;
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 
 		$row = $rows->item($j);
 
-		#echo "Content of row is:";
+		#webCommentPrint(Content of row is:";
 		#echo $row->textContent;
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 
 		$cells = $row->getElementsByTagName('td');
 
-		#echo "Cells is a:";
+		#webCommentPrint(Cells is a:";
 		#var_export($cells);
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 
 
-		#echo "\n\n";
-		#echo "Cells length:";
+		#webCommentPrint(\n\n";
+		#webCommentPrint(Cells length:";
 		#var_export($cells->length);
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 
 
 		$partyColumnNo = 2;
@@ -124,40 +124,40 @@ for($i=0;  $i<$h4Count; $i++) {
 		$votes = preg_replace("/[^0-9]/", "", trim($cells->item(3)->textContent));
 		if($testing)  $votes = rand(50, 5000);
 
-		echo "Scrapped: $party\t$votes\n";
+		webCommentPrint("Scrapped: $party\t$votes\n");
 
 
 		$resultsByRidingByParty[$i][$party] = $votes; 
 		$resultsByPartyByRiding[$party][$i] = $votes;
 
 		#var_export($resultsByRidingByParty);
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 		#var_export($resultsByPartyByRiding);
-		#echo "\n\n";
+		#webCommentPrint(\n\n";
 	}
 
 	$tableNoNeeded = 2*$i;
-	#echo "Getting table no $tableNoNeeded\n";
+	#webCommentPrint(Getting table no $tableNoNeeded\n)";
 	$table = $tableNodes->item($tableNoNeeded);
 
 	### Getting partipation data....
 	$rows = $table->getElementsByTagName('tr');
 	$numRows = $rows->length;
-    #echo "\nThere are $numRows rows\n";
+    #webCommentPrint(\nThere are $numRows rows\n";
 	$participationStr = $rows->item(0)->getElementsByTagName('td')->item(1)->textContent;
 	$participationData = explode('/', $participationStr);
 
 
 	$numVoters = preg_replace("/[^0-9]/", "", "$participationData[1]");
 
-    echo "Number of Voters: $numVoters\n";
+    webCommentPrint("Number of Voters: $numVoters\n");
 
 	$totalVotes = preg_replace("/[^0-9]/", "", "$participationData[0]");
-    echo "Number of total votes: $totalVotes\n";
+    webCommentPrint("Number of total votes: $totalVotes\n");
 
     $participationRate = $totalVotes / $numVoters;
     if($testing)  $participationRate = rand(0, 100)/100;
-    echo "Participation rate: $participationRate\n";
+    webCommentPrint("Participation rate: $participationRate\n");
 
 
     #$resultsByRidingSummary[$ridingID]['wastedVotes'] = preg_replace("/[^0-9]/", "", "$numVoters");
@@ -226,13 +226,12 @@ foreach($ridingNames as $ridingID => $ridingName) {
 	}
 
 
-    #echo "For $ridingName, the winning party was $winningParty with $winnerVotes.  Among the $totalValidVotes votes, there were $wastedVotes wasted votes " . round($wastedVotes/$totalValidVotes*100) . "%\n";
+    #webCommentPrint(For $ridingName, the winning party was $winningParty with $winnerVotes.  Among the $totalValidVotes votes, there were $wastedVotes wasted votes " . round($wastedVotes/$totalValidVotes*100) . "%\n";
 	if($totalValidVotes>0) {
-	    echo "For $ridingName, the winning party was $winningParty with $winnerVotes.  Among the $totalValidVotes votes, there were $wastedVotes wasted votes " . round($wastedVotes/$totalValidVotes*99) . "%";
+	    webCommentPrint("For $ridingName, the winning party was $winningParty with $winnerVotes.  Among the $totalValidVotes votes, there were $wastedVotes wasted votes " . round($wastedVotes/$totalValidVotes*99) . "%");
 	} else {
-		 echo "For $ridingName, no votes have been counted yet";
+		 webCommentPrint("For $ridingName, no votes have been counted yet");
 	}
-    echo "\n";
 
 
     ### Write row by data
@@ -246,12 +245,10 @@ foreach($ridingNames as $ridingID => $ridingName) {
 
 
 
-echo "\n\n\n\n";
-echo $outputContent;
+#echo $outputContent;
 
 file_put_contents($outputFile, $outputContent);
 
-echo "\n\n\n\n\n";
 
 ### More WVA
 $resultsByPartySummary  = array();
@@ -261,23 +258,30 @@ uasort($resultsByRidingSummary, function ($a, $b) {
     return ($a['wastedVotesPct'] - $b['wastedVotesPct'])*100;
 });   
 
+
+echo '<table width="100%"><tr><th>Riding name</th><th>Wasted votes %</th></tr>';
 foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
     #The participation rate threshold for which we will calculate the wasted votes.
     # 0.12 is the third of the partipation rate for the riding the lowest turnout (Fort McMurray) of the election with the lowest turnout (2008)
     $pRateThreshold = .12;
 
     if($ridingNumbers['pRate'] > $pRateThreshold) {
-        printf("%-50s%.2f %%\n", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
+        printf("<tr><td>%s</td><td>%.2f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
     }
 }
+echo "</table>";
 
 
-echo "\n\n\n\n\n";
 
 
-echo "List of parties are:\n";
+webCommentPrint("List of parties are:\n");
 
 sort($listOfParties);
 foreach($listOfParties as $partyName) {
-	echo "$partyName\n";
+	webCommentPrint("$partyName\n");
+}
+
+function webCommentPrint($comment) {
+	$comment = rtrim($comment);
+	echo "<!-- $comment -->\n";
 }
