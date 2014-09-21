@@ -1,11 +1,49 @@
+<table>
+
+<tr><td bgcolor="#00AAB4" border="1"><a href="http://www.fairvote.ca"><img src="http://campaign2015.fairvote.ca/wp-content/themes/fairvotecanada/images/structure/unfair.png"></a></td>
+
+
+<td>Hello,
+
+
+<p>My name is Julien Lamarche.  I am a volunteer for <a href="http://www.fairvote.ca">Fair Vote Canada</a>, an organization that does 
+public education and lobbying to change the voting system so that more votes count.</p>
+
+<p>Below is a compilation of the numbers taken from the 
+<a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp">New Brunswick live election results</a>.
+
+<p>It sorts ridings by rate of wasted votes.  A wasted vote is a vote that will not be represented in the legislature because it did not 
+go to the winning candidate.  </p>
+
+<p>Winner-take-all systems (both first past the post and preferential ballot - ie Alternative Vote) have a high 
+rate of wasted votes.  But most democracies have moved on to some form of proportional voting system which greatly diminish the lack of 
+representation (to about 5%). A proprotional voting system also eliminates false government majorities.</p>
+
+<p>If you wish to help, go <a href="http://secure.fairvote.ca/en/declaration">Sign the Declaration of Voters Rights</a>. More information 
+is available on the website of <a href="http://www.fairvote.ca">Fair Vote Canada</a></p>
+
+<p>Media contacts <b>only</b>: 
+<table border="1">
+<tr><td>Fair Vote New Brunswick contact</td><td> John Hoben </td><td>(506) 262-7130</td></tr>
+<tr><td>National Executive Director</td><td>Kelly Carmichael</td><td>(705) 559-9657</td></tr>
+<tr><td>Script author</td><td>Julien Lamarche</td><td>(613) 266-3793</td></tr>
+</table>
+</p>
+
+</td></tr></table>
+
 
 <!-- Scrapper for 2014 NB elections -->
 
 <?php
 
+require_once("php_fast_cache.php");
+phpFastCache::$storage = "auto";
+
+$dateFormat = 'Y-m-d H:i:s';
 
 $testing=FALSE;
-if($_GET["testing"]=="yes")  $testing=TRUE;
+if(isset($_GET["testing"]) && $_GET["testing"]=="yes")  $testing=TRUE;
 
 $limit=107;
 
@@ -21,6 +59,17 @@ $resultsByRidingSummary = array();
 $wastedVotesByParty     = array();
 
 
+
+### Check first caching
+
+$content = phpFastCache::get("main");
+
+if($content !== null && strlen($content) > 500) {
+	$content .= '<p><font size="-1">Cached results printed on ' . date($dateFormat) . '</font></p>';
+	printf("%s", $content);
+}
+else {
+
 ### Get the riding list first and objects
 
 $url = 'http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp';
@@ -29,7 +78,9 @@ webCommentPrint('Getting page....');
 $html = file_get_contents($url);
 
 $doc = new DOMDocument();
+libxml_use_internal_errors(true);
 $doc->loadHTML($html);
+libxml_use_internal_errors(false);
 $xpath = new DOMXPath($doc);
 
 ### Lets get the riding names
@@ -53,21 +104,6 @@ for($i=0;  $i<$h4Count; $i++) {
 	$district = trim(substr($district, strpos($district, ",") + 5));    
 
 	webCommentPrint("Doing riding of $district\n");
-
-	/* SKIP PARSING NEW HTML DOCUMENT SINCE WE ALREADY HAVE IT
-	$doc = new DOMDocument();
-	$doc->loadHTML($html);
-	$xpath = new DOMXPath($doc);
-
-
-    $xPathQuery = '//*[@id="grdResultsucElectoralDistrictResult'. $i . '"]/caption';
-
-    webCommentPrint(\n\nxPath: $xPathQuery\n\n");
-	$ridingNode = $xpath->query($xPathQuery);
-
-    echo $ridingNames[$i];
-	*/
-
 
 	$ridingNames[$i] = $district;
 	
@@ -235,8 +271,8 @@ foreach($ridingNames as $ridingID => $ridingName) {
 
 
     ### Write row by data
-    $outputContent .= "$wastedVotes\t" . round($resultsByRidingSummary[$ridingID]['wastedVotesPct']*100,2)  .  "\t"  . round($resultsByRidingSummary[$ridingID]['pRate']*100,2)   ;
-	$outputContent .= "\n";
+    #$outputContent .= "$wastedVotes\t" . round($resultsByRidingSummary[$ridingID]['wastedVotesPct']*100,2)  .  "\t"  . round($resultsByRidingSummary[$ridingID]['pRate']*100,2)   ;
+	#$outputContent .= "\n";
 
 }
 
@@ -247,7 +283,7 @@ foreach($ridingNames as $ridingID => $ridingName) {
 
 #echo $outputContent;
 
-file_put_contents($outputFile, $outputContent);
+#file_put_contents($outputFile, $outputContent);
 
 
 ### More WVA
@@ -255,21 +291,33 @@ $resultsByPartySummary  = array();
 
 uasort($resultsByRidingSummary, function ($a, $b) {
     #var_export($b); 
-    return ($a['wastedVotesPct'] - $b['wastedVotesPct'])*100;
+    return ($b['wastedVotesPct'] - $a['wastedVotesPct'])*100;
 });   
 
-
-echo '<table width="100%"><tr><th>Riding name</th><th>Wasted votes %</th></tr>';
+$nonListed = '';
+$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Wasted votes %</th></tr>';
 foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
     #The participation rate threshold for which we will calculate the wasted votes.
     # 0.12 is the third of the partipation rate for the riding the lowest turnout (Fort McMurray) of the election with the lowest turnout (2008)
     $pRateThreshold = .12;
 
     if($ridingNumbers['pRate'] > $pRateThreshold) {
-        printf("<tr><td>%s</td><td>%.2f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
-    }
+        $content .= sprintf("<tr><td>%s</td><td>%.2f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
+    } else {
+		$nonListed .= sprintf("%s (%.1f %%), ", $ridingNames[$ridingID], $ridingNumbers['pRate']);
+	}
 }
-echo "</table>";
+$content .= "</table></p>";
+
+if(!empty($nonListed)) {
+	$content .= "<p>The following ridings are not listed because they don't have enough votes counted yet: $nonListed</p>";
+}
+
+$content .= '<p><font size="-1">Results as of ' . date($dateFormat) . '</font></p>';
+
+phpFastCache::set("main", $content, 30);
+$content .= '<p><font size="-1">Non-cached results printed on ' . date($dateFormat) . '</font></p>';
+echo $content;
 
 
 
@@ -281,7 +329,15 @@ foreach($listOfParties as $partyName) {
 	webCommentPrint("$partyName\n");
 }
 
+### End of else for non-cached, fresh results
+}
+
 function webCommentPrint($comment) {
 	$comment = rtrim($comment);
 	echo "<!-- $comment -->\n";
 }
+
+
+
+?>
+
