@@ -16,11 +16,16 @@ public education and lobbying to change the voting system so that more votes cou
 go to the winning candidate.  </p>
 
 <p>Winner-take-all systems (both first past the post and preferential ballot - ie Alternative Vote) have a high 
-rate of wasted votes.  But most democracies have moved on to some form of proportional voting system which greatly diminish the lack of 
+rate of wasted or unreprested votes.  But most democracies have moved on to some form of proportional voting system which greatly diminish the lack of 
 representation (to about 5%). A proprotional voting system also eliminates false government majorities.</p>
 
-<p>If you wish to help, go <a href="http://secure.fairvote.ca/en/declaration">Sign the Declaration of Voters Rights</a>. More information 
-is available on the website of <a href="http://www.fairvote.ca">Fair Vote Canada</a></p>
+<p>If you wish to help:<ul>
+<li>go <a href="http://secure.fairvote.ca/en/declaration">Sign the Declaration of Voters Rights</a></li>
+<li>Retweet relevant <a href="https://twitter.com/cyclingzealot">@cyclingzealot</a>, <a href="https://twitter.com/search?q=%23wastedvotes">#wastedvotes</a> tweets during the nb2014 election</li>
+<li>After the election, follow and retweet <a href="https://twitter.com/FairVoteCanada">@FairVoteCanada</a>, <a href="https://twitter.com/search?q=%23pr2015">#pr2015</a> and <a href="https://twitter.com/search?q=%23fairvote">#fairvote</a></li>
+</ul>
+
+More information is available on the website of <a href="http://www.fairvote.ca">Fair Vote Canada</a></p>
 
 <p>Media contacts <b>only</b>: 
 <table border="1">
@@ -304,7 +309,7 @@ foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
     if($ridingNumbers['pRate'] > $pRateThreshold) {
         $content .= sprintf("<tr><td>%s</td><td>%.2f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
     } else {
-		$nonListed .= sprintf("%s (%.1f %%), ", $ridingNames[$ridingID], $ridingNumbers['pRate']);
+		$nonListed .= sprintf("%s (%d %%), ", $ridingNames[$ridingID], $ridingNumbers['pRate']*100);
 	}
 }
 $content .= "</table></p>";
@@ -341,3 +346,5 @@ function webCommentPrint($comment) {
 
 ?>
 
+
+<p><font size="-1">Code available on <a href="https://github.com/cyclingzealot/nb2014">Github</a></font></p>
