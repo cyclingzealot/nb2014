@@ -6,7 +6,7 @@
 <td>Hello,
 
 
-<p>My name is Julien Lamarche.  I am a volunteer for <a href="http://www.fairvote.ca">Fair Vote Canada</a>, an organization that does 
+<p>My name is <a href="https://www.linkedin.com/in/julienlamarche">Julien Lamarche</a>.  I am a volunteer for <a href="http://www.fairvote.ca">Fair Vote Canada</a>, an organization that does 
 public education and lobbying to change the voting system so that more votes count.</p>
 
 <p>Below is a compilation of the numbers taken from the 
@@ -27,11 +27,13 @@ representation (to about 5%). A proprotional voting system also eliminates false
 
 More information is available on the website of <a href="http://www.fairvote.ca">Fair Vote Canada</a></p>
 
-<p>Media contacts <b>only</b>: 
+<p>For more information: 
 <table border="1">
-<tr><td>Fair Vote New Brunswick contact</td><td> John Hoben </td><td>(506) 262-7130</td></tr>
-<tr><td>National Executive Director</td><td>Kelly Carmichael</td><td>(705) 559-9657</td></tr>
-<tr><td>Script author</td><td>Julien Lamarche</td><td>(613) 266-3793</td></tr>
+<tr><th>Position</th><th>Name & email</th><th>Phone (<u>Media only please</u>)</th>
+<tr><td>Fair Vote New Brunswick contact</td><td><a href="mailto:hdpnx@stu.ca">John Hoben</a></td><td>(506) 262-7130</td></tr>
+<tr><td>Contact francophone</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</a></td><td>(613) 266-3793</td></tr>
+<tr><td>National Executive Director</td><td><a href="mailto:office@fairvote.ca">Kelly Carmichael</a></td><td>(705) 559-9657</td></tr>
+<tr><td>Script author</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</td><td>(613) 266-3793</td></tr>
 </table>
 </p>
 
