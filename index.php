@@ -1,3 +1,15 @@
+<?php
+require_once("php_fast_cache.php");
+phpFastCache::$storage = "auto";
+
+$number = phpFastCache::get("entireJurisdictionResult");
+
+if(!empty($number) && is_numeric($number) && $number > 0) {
+	echo "<h1>$number unrepresented voters (so far) in New Brunswick 2014 election</h1>";
+} else {
+	echo '<h1>How *MANY* unrepresented voters?</h1>';
+}
+?>
 <table>
 
 <tr><td bgcolor="#00AAB4" border="1"><a href="http://www.fairvote.ca"><img src="http://campaign2015.fairvote.ca/wp-content/themes/fairvotecanada/images/structure/unfair.png"></a></td>
@@ -17,7 +29,7 @@ go to the winning candidate.  </p>
 
 <p>Winner-take-all systems (both first past the post and preferential ballot - ie Alternative Vote) have a high 
 rate of wasted or unreprested votes.  But most democracies have moved on to some form of proportional voting system which greatly diminish the lack of 
-representation (to about 5%). A proprotional voting system also eliminates false government majorities.</p>
+representation (to about 5% of unrepresented votes). A proprotional voting system also eliminates false government majorities.</p>
 
 <p>If you wish to help:<ul>
 <li>go <a href="http://secure.fairvote.ca/en/declaration">Sign the Declaration of Voters Rights</a></li>
@@ -44,13 +56,14 @@ More information is available on the website of <a href="http://www.fairvote.ca"
 
 <?php
 
-require_once("php_fast_cache.php");
-phpFastCache::$storage = "auto";
 
 $dateFormat = 'Y-m-d H:i:s';
 
 $testing=FALSE;
 if(isset($_GET["testing"]) && $_GET["testing"]=="yes")  $testing=TRUE;
+
+$cacheReset=FALSE;
+if(isset($_GET["cache"]) && $_GET["cache"]=="reset")  $cacheReset = TRUE;
 
 $limit=107;
 
@@ -71,7 +84,7 @@ $wastedVotesByParty     = array();
 
 $content = phpFastCache::get("main");
 
-if($content !== null && strlen($content) > 500) {
+if(($content !== null && strlen($content) > 500) && $cacheReset !== TRUE) {
 	$content .= '<p><font size="-1">Cached results printed on ' . date($dateFormat) . '</font></p>';
 	printf("%s", $content);
 }
@@ -196,10 +209,17 @@ for($i=0;  $i<$h4Count; $i++) {
     webCommentPrint("Number of Voters: $numVoters\n");
 
 	$totalVotes = preg_replace("/[^0-9]/", "", "$participationData[0]");
+
+	$pRateTesting = 0;
+	if($testing)  {
+		$pRateTesting	= rand(0, 80)/100;
+		$totalVotes		= round($pRateTesting * $numVoters);
+	}
+
     webCommentPrint("Number of total votes: $totalVotes\n");
 
     $participationRate = $totalVotes / $numVoters;
-    if($testing)  $participationRate = rand(0, 100)/100;
+    if($testing)  $participationRate = $pRateTesting;
     webCommentPrint("Participation rate: $participationRate\n");
 
 
@@ -207,6 +227,12 @@ for($i=0;  $i<$h4Count; $i++) {
     $resultsByRidingSummary[$i]['numVoters']    = preg_replace("/[^0-9]/", "", "$numVoters");
     $resultsByRidingSummary[$i]['totalVotes']   = preg_replace("/[^0-9]/", "", "$totalVotes");
     $resultsByRidingSummary[$i]['pRate']        = $participationRate;
+
+	/*
+	echo '<pre>';
+	var_export($resultsByRidingSummary[$i]);
+	echo '</pre>';
+	*/
 }
 
 
@@ -226,6 +252,8 @@ $outputContent .= "\n";
 # For WV analysis (WVA)
 $wastedVotesMax = 0;
 $wastedVotesMaxRidingName = '';
+
+$entireJurisdiction = array('wastedVotes' => 0, 'totalValidVotes'=>0, 'numVoters'=>0, 'totalVotes'=>0);
 
 ### Make the rows of the csv file
 foreach($ridingNames as $ridingID => $ridingName) {
@@ -281,6 +309,24 @@ foreach($ridingNames as $ridingID => $ridingName) {
     #$outputContent .= "$wastedVotes\t" . round($resultsByRidingSummary[$ridingID]['wastedVotesPct']*100,2)  .  "\t"  . round($resultsByRidingSummary[$ridingID]['pRate']*100,2)   ;
 	#$outputContent .= "\n";
 
+	$entireJurisdiction['wastedVotes']		+= $wastedVotes;
+	$entireJurisdiction['totalValidVotes']	+= $totalValidVotes;
+	$entireJurisdiction['totalVotes']		+= $resultsByRidingSummary[$ridingID]['totalVotes'];
+	$entireJurisdiction['numVoters']		+= $resultsByRidingSummary[$ridingID]['numVoters'];
+
+	$entireJurisdiction['wastedVotesPct']    = $entireJurisdiction['wastedVotes'] / $entireJurisdiction['totalValidVotes'];
+	$entireJurisdiction['pRate']		     = $entireJurisdiction['totalVotes'] / $entireJurisdiction['numVoters'];
+
+
+	/*
+	echo '<pre>';
+	echo "Results by riding\n";
+	var_export($resultsByRidingSummary[$ridingID]);
+	echo "\nEntire Jrdt\n";
+	var_export($entireJurisdiction);
+	echo '</pre>';
+	*/
+	
 }
 
 #var_export(array_keys($resultsByRidingSummary));
@@ -302,18 +348,19 @@ uasort($resultsByRidingSummary, function ($a, $b) {
 });   
 
 $nonListed = '';
-$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Unrepresented votes %</th></tr>';
+$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Unrepresented votes %</th><th>Unrepresented votes</th><th>Participation rate % (so far) </th></tr>';
 foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
     #The participation rate threshold for which we will calculate the unrepresented votes.
     # 0.12 is the third of the partipation rate for the riding the lowest turnout (Fort McMurray) of the election with the lowest turnout (2008)
     $pRateThreshold = .12;
 
     if($ridingNumbers['pRate'] > $pRateThreshold) {
-        $content .= sprintf("<tr><td>%s</td><td>%.2f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100);
+        $content .= sprintf("<tr><td>%s</td><td>%.2f %%</td><td>%d</td><td>%.0f %%</td></tr>", $ridingNames[$ridingID], $ridingNumbers['wastedVotesPct']*100, $ridingNumbers['wastedVotes'], $ridingNumbers['pRate']*100);
     } else {
 		$nonListed .= sprintf("%s (%d %%), ", $ridingNames[$ridingID], $ridingNumbers['pRate']*100);
 	}
 }
+$content .= sprintf("<tr style=\"font-weight: bold;\"><td>%s</td><td>%.2f %%</td><td>%d</td><td>%.0f %%</td></tr>", "New Brunswick", $entireJurisdiction['wastedVotesPct']*100, $entireJurisdiction['wastedVotes'], $entireJurisdiction['pRate']*100);
 $content .= "</table></p>";
 
 if(!empty($nonListed)) {
@@ -326,7 +373,12 @@ phpFastCache::set("main", $content, 30);
 $content .= '<p><font size="-1">Non-cached results printed on ' . date($dateFormat) . '</font></p>';
 echo $content;
 
-
+if(!empty($entireJurisdiction['totalValidVotes']) && $entireJurisdiction['totalValidVotes'] > 0) {
+	$number = $entireJurisdiction['wastedVotes'];
+	phpFastCache::set("entireJurisdictionResult", $number, 1000);
+} else {
+	phpFastCache::set("entireJurisdictionResult", -1, 1);
+}
 
 
 webCommentPrint("List of parties are:\n");
@@ -336,8 +388,16 @@ foreach($listOfParties as $partyName) {
 	webCommentPrint("$partyName\n");
 }
 
+/*
+echo '<pre>';
+var_export($entireJurisdiction);
+echo '</pre>';
+*/
+
 ### End of else for non-cached, fresh results
 }
+
+
 
 function webCommentPrint($comment) {
 	$comment = rtrim($comment);
