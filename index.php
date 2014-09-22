@@ -12,7 +12,7 @@ public education and lobbying to change the voting system so that more votes cou
 <p>Below is a compilation of the numbers taken from the 
 <a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp">New Brunswick live election results</a>.
 
-<p>It sorts ridings by rate of wasted votes.  A wasted vote is a vote that will not be represented in the legislature because it did not 
+<p>It sorts ridings by percentage of unrepresented votes.  An unrepresented vote is a vote that will not be represented in the legislature because it did not 
 go to the winning candidate.  </p>
 
 <p>Winner-take-all systems (both first past the post and preferential ballot - ie Alternative Vote) have a high 
@@ -302,9 +302,9 @@ uasort($resultsByRidingSummary, function ($a, $b) {
 });   
 
 $nonListed = '';
-$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Wasted votes %</th></tr>';
+$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Unrepresented votes %</th></tr>';
 foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
-    #The participation rate threshold for which we will calculate the wasted votes.
+    #The participation rate threshold for which we will calculate the unrepresented votes.
     # 0.12 is the third of the partipation rate for the riding the lowest turnout (Fort McMurray) of the election with the lowest turnout (2008)
     $pRateThreshold = .12;
 
