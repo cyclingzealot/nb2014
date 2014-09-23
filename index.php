@@ -1,3 +1,5 @@
+<a name="top"></a>
+
 <?php
 require_once("php_fast_cache.php");
 phpFastCache::$storage = "auto";
@@ -22,10 +24,10 @@ if(!empty($number) && is_numeric($number) && $number > 5000) {
 public education and lobbying to change the voting system so that more votes count.</p>
 
 <p>Below is a compilation of the numbers taken from the 
-<a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp">New Brunswick live election results</a>.
+<a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp">New Brunswick live election results</a>.  
 
 <p>It sorts ridings by percentage of unrepresented votes.  An unrepresented vote is a vote that will not be represented in the legislature because it did not 
-go to the winning candidate.  </p>
+go to the winning candidate.  At the bottom you will also see <a href="#byParty">unrepresented votes by party</a>.</p>
 
 <p>Winner-take-all systems (both first past the post and preferential ballot - ie Alternative Vote) have a high 
 rate of wasted or unreprested votes.  But most democracies have moved on to some form of proportional voting system which greatly diminish the lack of 
@@ -58,6 +60,7 @@ More information is available on the website of <a href="http://www.fairvote.ca"
 
 
 $dateFormat = 'Y-m-d H:i:s';
+$content = '';
 
 $testing=FALSE;
 if(isset($_GET["testing"]) && $_GET["testing"]=="yes")  $testing=TRUE;
@@ -355,7 +358,8 @@ uasort($resultsByRidingSummary, function ($a, $b) {
 });   
 
 $nonListed = '';
-$content = '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Unrepresented votes %</th><th>Unrepresented votes</th><th>Participation rate % (so far) </th></tr>';
+
+$content .= '<p><table width="100%" border="1"><tr><th>Riding name</th><th>Unrepresented votes %</th><th>Unrepresented votes</th><th>Participation rate % (so far) </th></tr>';
 foreach($resultsByRidingSummary as $ridingID => $ridingNumbers) {
     #The participation rate threshold for which we will calculate the unrepresented votes.
     # 0.12 is the third of the partipation rate for the riding the lowest turnout (Fort McMurray) of the election with the lowest turnout (2008)
@@ -372,11 +376,12 @@ $content .= "</table></p>";
 
 // Print unrepresented votes by party
 arsort($wastedVotesByParty);
-$content .= "<p>Unrepresented votes by party:<ol>";
+$content .= "<p><a name=\"byParty\">Unrepresented votes by party:</a><ol>";
 foreach($wastedVotesByParty as $partyName => $partyVotes) {
 	$content .= "<li>$partyName: $partyVotes</li>\n";;;;
 }
 $content .= "</ol></p>";
+$content .= '<a href="#top">Top</a>';
 
 if(!empty($nonListed)) {
 	$content .= "<p>The following ridings are not listed because they don't have enough votes counted yet: $nonListed</p>";
