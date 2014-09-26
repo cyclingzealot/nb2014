@@ -1,0 +1,4 @@
+*Better mobile interface
+*Retweet, share button
+*Redo with twig and SYmfony
+*Long term caching ... and afterwards persitent storage if the page fails
