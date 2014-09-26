@@ -24,7 +24,7 @@ if(!empty($number) && is_numeric($number) && $number > 5000) {
 public education and lobbying to change the voting system so that more votes count.</p>
 
 <p>Below is a compilation of the numbers taken from the 
-<a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp">New Brunswick live election results</a>.  
+<a href="http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-results-e.asp">New Brunswick live election results</a>.  
 
 <p>It sorts ridings by percentage of unrepresented votes.  An unrepresented vote is a vote that will not be represented in the legislature because it did not 
 go to the winning candidate.  At the bottom you will also see <a href="#byParty">unrepresented votes by party</a>.</p>
@@ -43,11 +43,11 @@ More information is available on the website of <a href="http://www.fairvote.ca"
 
 <p>For more information: 
 <table border="1">
-<tr><th>Position</th><th>Name & email</th><th>Phone (<u>Media only please</u>)</th>
-<tr><td>Fair Vote New Brunswick contact</td><td><a href="mailto:hdpnx@stu.ca">John Hoben</a></td><td>(506) 262-7130</td></tr>
-<tr><td>Contact francophone</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</a></td><td>(613) 266-3793</td></tr>
-<tr><td>National Executive Director</td><td><a href="mailto:office@fairvote.ca">Kelly Carmichael</a></td><td>(705) 559-9657</td></tr>
-<tr><td>Script author</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</td><td>(613) 266-3793</td></tr>
+<tr><th>Position</th><th>Name & email</th></tr>
+<tr><td>Fair Vote New Brunswick contact</td><td><a href="mailto:hdpnx@stu.ca">John Hoben</a></td></tr>
+<tr><td>Contact francophone</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</a></td></tr>
+<tr><td>National Executive Director</td><td><a href="mailto:office@fairvote.ca">Kelly Carmichael</a></td></tr>
+<tr><td>Script author</td><td><a href="mailto:julien.lamarche@gmail.com">Julien Lamarche</td></tr>
 </table>
 </p>
 
@@ -95,7 +95,8 @@ else {
 
 ### Get the riding list first and objects
 
-$url = 'http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp';
+#$url = 'http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-resultshtml-e.asp';
+$url = 'http://www.gnb.ca/elections/results-resultats/2014-09-22/2014-09-22-results-e.asp';
 
 webCommentPrint('Getting page....');
 $html = file_get_contents($url);
@@ -387,7 +388,7 @@ if(!empty($nonListed)) {
 	$content .= "<p>The following ridings are not listed because they don't have enough votes counted yet: $nonListed</p>";
 }
 
-$content .= '<p><font size="-1">Results as of ' . date($dateFormat) . '</font></p>';
+$content .= '<hr /><p><font size="-1">Results as of ' . date($dateFormat) . '</font></p>';
 
 phpFastCache::set("main", $content, 30);
 $content .= '<p><font size="-1">Non-cached results printed on ' . date($dateFormat) . '</font></p>';
@@ -402,7 +403,7 @@ echo $content;
 
 if(!empty($entireJurisdiction['totalValidVotes']) && $entireJurisdiction['totalValidVotes'] > 0) {
 	$number = $entireJurisdiction['wastedVotes'];
-	phpFastCache::set("entireJurisdictionResult", $number, 1000);
+	phpFastCache::set("entireJurisdictionResult", $number, 60*60*24*365);
 } else {
 	phpFastCache::set("entireJurisdictionResult", -1, 1);
 }
